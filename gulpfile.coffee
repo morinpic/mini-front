@@ -1,6 +1,10 @@
 gulp = require 'gulp'
 jade = require 'gulp-jade'
 del = require 'del'
+bower = require 'gulp-bower-files'
+flatten = require 'gulp-flatten'
+uglify = require 'gulp-uglify'
+cond   = require 'gulp-if'
 
 conf =
   src: 'assets'
@@ -19,6 +23,13 @@ gulp.task 'jade', ->
     .pipe jade
       pretty: true
     .pipe gulp.dest "#{conf.dest}"
+
+
+gulp.task 'bower', ->
+  bower()
+    .pipe cond conf.prod, uglify({preserveComments:'some'})
+    .pipe flatten()
+    .pipe (gulp.dest "#{conf.dest}/js/lib")
 
 
 gulp.task 'default', [
