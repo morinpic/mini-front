@@ -5,6 +5,7 @@ bower = require 'gulp-bower-files'
 flatten = require 'gulp-flatten'
 uglify = require 'gulp-uglify'
 cond   = require 'gulp-if'
+inject = require 'gulp-inject'
 
 conf =
   src: 'assets'
@@ -22,6 +23,10 @@ gulp.task 'jade', ->
   gulp.src ["#{conf.src}/jade/**/*.jade", "!#{conf.src}/jade/**/_*.jade"]
     .pipe jade
       pretty: true
+    .pipe inject(
+      gulp.src("#{conf.dest}/js/lib/*.js", read: false),
+      relative: true
+    )
     .pipe gulp.dest "#{conf.dest}"
 
 
@@ -33,9 +38,11 @@ gulp.task 'bower', ->
 
 
 gulp.task 'default', [
-    # 'clean'
+    #'clean'
+    #'bower'
     'jade'
   ]
+
 
 gulp.task 'prod', ->
     conf.prod = true
