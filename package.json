@@ -1,6 +1,7 @@
 {
   "name": "mini-front",
   "scripts": {
+    "postinstall": "bower install",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
