@@ -37,6 +37,11 @@ gulp.task 'bower', ->
     .pipe (gulp.dest "#{conf.dest}/js/lib")
 
 
+gulp.task 'copy:img', ->
+  return gulp.src ["#{conf.src}/img/!(_)**/*"]
+    .pipe gulp.dest "#{conf.dest}/img/"
+
+
 gulp.task "browser-sync", ->
   browserSync.init null,
     server: conf.dest
@@ -46,13 +51,15 @@ gulp.task "browser-sync", ->
 gulp.task 'watch', ['browser-sync'], ->
   $.watch ["#{conf.src}/**/*.{jade,_jade}"], ->
     gulp.start 'jade'
+  $.watch ["#{conf.src}/**/*.png"], ->
+    gulp.start 'copy:img'
 
 # server
 gulp.task 'server', ->
   runSequence(
     'clean'
     # 'bower'
-    'jade'
+    ['jade', 'copy:img']
     'watch'
   )
 
