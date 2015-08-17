@@ -30,6 +30,22 @@ gulp.task 'jade', ->
       stream: true
 
 
+gulp.task 'sass', ->
+  return $.rubySass("#{conf.src}/sass/", {
+      bundleExec: true,
+      compass: true
+    })
+    .on 'error', (err)->
+      console.error 'Error!', err.message
+    .pipe $.autoprefixer
+      browsers: ['last 2 versions']
+      cascade: true
+    .pipe $.if conf.prod, $.minifyCss()
+    .pipe gulp.dest "#{conf.dest}/css"
+    .pipe browserSync.reload
+      stream: true
+
+
 gulp.task 'bower', ->
   return $.bowerFiles()
     .pipe $.if conf.prod, $.uglify({preserveComments:'some'})
@@ -58,6 +74,8 @@ gulp.task "browser-sync", ->
 gulp.task 'watch', ['browser-sync'], ->
   $.watch ["#{conf.src}/**/*.{jade,_jade}"], ->
     gulp.start 'jade'
+  $.watch ["#{conf.src}/**/*.scss"], ->
+    gulp.start 'sass'
   $.watch ["#{conf.src}/js/**/*"], ->
     gulp.start 'js'
   $.watch ["#{conf.src}/**/*.png"], ->
@@ -82,5 +100,6 @@ gulp.task 'default', [
   ]
 
 
+# prod
 gulp.task 'prod', ->
     conf.prod = true
