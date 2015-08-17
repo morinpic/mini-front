@@ -1,11 +1,8 @@
 gulp = require 'gulp'
-jade = require 'gulp-jade'
+$ = require('gulp-load-plugins')()
 del = require 'del'
-bower = require 'gulp-bower-files'
-flatten = require 'gulp-flatten'
-uglify = require 'gulp-uglify'
-cond   = require 'gulp-if'
-inject = require 'gulp-inject'
+browserSync = require 'browser-sync'
+runSequence = require 'run-sequence'
 
 conf =
   src: 'assets'
@@ -14,29 +11,52 @@ conf =
 
 
 gulp.task 'clean', ->
-  del [
+  return del [
     "#{conf.dest}/**/*"
   ]
 
 
 gulp.task 'jade', ->
-  gulp.src ["#{conf.src}/jade/**/*.jade", "!#{conf.src}/jade/**/_*.jade"]
-    .pipe jade
+  return gulp.src ["#{conf.src}/jade/**/!(_)*.jade"]
+    .pipe $.plumber
+      errorHandler: $.notify.onError('<%= error.message %>')
+    .pipe $.jade
       pretty: true
-    .pipe inject(
-      gulp.src("#{conf.dest}/js/lib/*.js", read: false),
-      relative: true
-    )
+    # .pipe $.inject(
+    #   gulp.src("#{conf.src}/js/lib/*.js", read: false)
+    # )
     .pipe gulp.dest "#{conf.dest}"
+    .pipe browserSync.reload
+      stream: true
 
 
 gulp.task 'bower', ->
-  bower()
-    .pipe cond conf.prod, uglify({preserveComments:'some'})
-    .pipe flatten()
+  return $.bowerFiles()
+    .pipe $.if conf.prod, $.uglify({preserveComments:'some'})
+    .pipe $.flatten()
     .pipe (gulp.dest "#{conf.dest}/js/lib")
 
 
+gulp.task "browser-sync", ->
+  browserSync.init null,
+    server: conf.dest
+    reloadDelay: 2000
+
+
+gulp.task 'watch', ['browser-sync'], ->
+  $.watch ["#{conf.src}/**/*.{jade,_jade}"], ->
+    gulp.start 'jade'
+
+# server
+gulp.task 'server', ->
+  runSequence(
+    'clean'
+    # 'bower'
+    'jade'
+    'watch'
+  )
+
+# default
 gulp.task 'default', [
     #'clean'
     #'bower'
